@@ -16,102 +16,94 @@ class HeaderGreeting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(24.0),
-          bottomRight: Radius.circular(24.0),
-        ),
-      ),
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      color: colorScheme.primary,
       child: SafeArea(
         bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 24,
-                      backgroundColor: Colors.white24,
-                      child: Icon(Icons.person, color: Colors.white, size: 28),
-                    ),
-                    const SizedBox(width: 12),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Welcome back,',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          userName,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                IconButton(
-                  onPressed: onNotificationTap,
-                  icon: Stack(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Row(
                     children: [
-                      const Icon(Icons.notifications_outlined,
-                          color: Colors.white, size: 28),
-                      if (activeDeviceCount > 0)
-                        Positioned(
-                          right: 0,
-                          top: 0,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.amber,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '$activeDeviceCount',
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                      const CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.white24,
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.white,
+                          size: 28,
                         ),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Welcome back,',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: colorScheme.onPrimary.withValues(
+                                    alpha: 0.8,
+                                  ),
+                                ),
+                          ),
+                          Text(
+                            userName,
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(
+                                  color: colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              onChanged: onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search devices or rooms...',
-                hintStyle: const TextStyle(color: Colors.white70),
-                prefixIcon: const Icon(Icons.search, color: Colors.white70),
-                filled: true,
-                fillColor: Colors.white.withValues(alpha: 0.2),
-                contentPadding: const EdgeInsets.symmetric(vertical: 0.0),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                  borderSide: BorderSide.none,
-                ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: onNotificationTap,
+                    color: colorScheme.onPrimary,
+                    tooltip: 'Show active devices',
+                    icon: Badge.count(
+                      count: activeDeviceCount,
+                      isLabelVisible: activeDeviceCount > 0,
+                      backgroundColor: colorScheme.tertiaryContainer,
+                      textColor: colorScheme.onTertiaryContainer,
+                      child: const Icon(Icons.notifications_outlined, size: 28),
+                    ),
+                  ),
+                ],
               ),
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                onChanged: onSearchChanged,
+                decoration: InputDecoration(
+                  hintText: 'Search devices or rooms...',
+                  hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                  filled: true,
+                  fillColor: colorScheme.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                style: TextStyle(color: colorScheme.onSurface),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -19,13 +19,7 @@ class QuickModeSelector extends StatelessWidget {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            'Quick Modes',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          child: Text('Quick Modes'),
         ),
         const SizedBox(height: 12),
         SizedBox(
@@ -46,14 +40,11 @@ class QuickModeSelector extends StatelessWidget {
                     onModeSelected(mode);
                   }
                 },
-                selectedColor: Theme.of(context).primaryColor,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onSurface,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                ),
-                backgroundColor: Colors.grey[200],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
                 ),
               );
             },

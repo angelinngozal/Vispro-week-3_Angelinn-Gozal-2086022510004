@@ -7,6 +7,7 @@ class StatMetricCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback? onTap;
+  final bool prominent;
 
   const StatMetricCard({
     super.key,
@@ -16,52 +17,56 @@ class StatMetricCard extends StatelessWidget {
     required this.icon,
     required this.color,
     this.onTap,
+    this.prominent = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      color: prominent ? colorScheme.primaryContainer : colorScheme.surface,
+      child: InkWell(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(16.0),
-            border: Border.all(color: color.withValues(alpha: 0.3)),
-          ),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: EdgeInsets.all(prominent ? 20 : 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 28),
+              Icon(
+                icon,
+                color: prominent ? colorScheme.primary : color,
+                size: prominent ? 30 : 24,
+              ),
               const SizedBox(height: 12),
               Text(
                 title,
-                style: TextStyle(
-                  color: Colors.grey[700],
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: Theme.of(context).textTheme.labelLarge
+                    ?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.end,
+                spacing: 4,
                 children: [
                   Text(
                     value,
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style:
+                        (prominent
+                                ? Theme.of(context).textTheme.headlineMedium
+                                : Theme.of(context).textTheme.titleLarge)
+                            ?.copyWith(
+                              color: prominent ? colorScheme.primary : color,
+                              fontWeight: FontWeight.w700,
+                            ),
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    unit,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 3),
+                    child: Text(
+                      unit,
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   ),
                 ],

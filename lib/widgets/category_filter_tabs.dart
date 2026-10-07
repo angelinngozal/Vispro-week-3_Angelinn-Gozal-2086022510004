@@ -24,33 +24,10 @@ class CategoryFilterTabs extends StatelessWidget {
         itemBuilder: (context, index) {
           final category = categories[index];
           final isSelected = category == selectedCategory;
-          return GestureDetector(
-            onTap: () => onCategorySelected(category),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).primaryColor.withValues(alpha: 0.15)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-                border: isSelected
-                    ? Border.all(color: Theme.of(context).primaryColor)
-                    : null,
-              ),
-              child: Text(
-                category,
-                style: TextStyle(
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.grey[600],
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 14,
-                ),
-              ),
-            ),
+          return ChoiceChip(
+            label: Text(category),
+            selected: isSelected,
+            onSelected: (_) => onCategorySelected(category),
           );
         },
       ),

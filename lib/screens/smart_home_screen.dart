@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+
 import '../models/smart_device.dart';
-import '../widgets/header_greeting.dart';
-import '../widgets/stat_metric_card.dart';
-import '../widgets/quick_mode_selector.dart';
 import '../widgets/category_filter_tabs.dart';
 import '../widgets/device_control_tile.dart';
+import '../widgets/header_greeting.dart';
+import '../widgets/quick_mode_selector.dart';
+import '../widgets/stat_metric_card.dart';
 
 class SmartHomeScreen extends StatefulWidget {
   const SmartHomeScreen({super.key});
@@ -14,7 +15,6 @@ class SmartHomeScreen extends StatefulWidget {
 }
 
 class _SmartHomeScreenState extends State<SmartHomeScreen> {
-  // Hoisted state
   String _activeMode = 'Home';
   String _selectedRoomCategory = 'All Rooms';
   String _searchQuery = '';
@@ -79,7 +79,6 @@ class _SmartHomeScreenState extends State<SmartHomeScreen> {
     'Office',
   ];
 
-  // Callback handlers for state modification
   void _handleDeviceToggle(String deviceId, bool isOn) {
     setState(() {
       _devices = _devices.map((device) {
@@ -95,8 +94,9 @@ class _SmartHomeScreenState extends State<SmartHomeScreen> {
     setState(() {
       _activeMode = mode;
       if (mode == 'Away') {
-        _devices =
-            _devices.map((device) => device.copyWith(isOn: false)).toList();
+        _devices = _devices
+            .map((device) => device.copyWith(isOn: false))
+            .toList();
       } else if (mode == 'Eco') {
         _devices = _devices.map((device) {
           if (device.powerConsumptionWatts > 500) {
@@ -108,326 +108,187 @@ class _SmartHomeScreenState extends State<SmartHomeScreen> {
     });
   }
 
-  void _handleCategoryChange(String category) {
-    setState(() {
-      _selectedRoomCategory = category;
-    });
-  }
-
-  void _handleSearchChange(String query) {
-    setState(() {
-      _searchQuery = query;
-    });
-  }
-
   void _handleNotificationTap() {
+    final activeCount = _devices.where((device) => device.isOn).length;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: const Color(0xFF1E293B),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        content: Row(
-          children: [
-            const Icon(Icons.info_outline_rounded, color: Color(0xFF818CF8)),
-            const SizedBox(width: 12),
-            Text(
-              'Active devices running: ${_devices.where((d) => d.isOn).length}',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ],
-        ),
-      ),
+      SnackBar(content: Text('Active devices running: $activeCount')),
     );
   }
 
-  // Derived state calculations
   List<SmartDevice> get _filteredDevices {
     return _devices.where((device) {
-      final matchesCategory = _selectedRoomCategory == 'All Rooms' ||
+      final matchesCategory =
+          _selectedRoomCategory == 'All Rooms' ||
           device.room == _selectedRoomCategory;
-      final matchesSearch = _searchQuery.isEmpty ||
-          device.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          device.room.toLowerCase().contains(_searchQuery.toLowerCase());
+      final query = _searchQuery.toLowerCase();
+      final matchesSearch =
+          query.isEmpty ||
+          device.name.toLowerCase().contains(query) ||
+          device.room.toLowerCase().contains(query);
       return matchesCategory && matchesSearch;
     }).toList();
   }
 
-  int get _activeCount => _devices.where((d) => d.isOn).length;
+  int get _activeCount => _devices.where((device) => device.isOn).length;
 
   double get _totalPowerConsumptionKw {
     final totalWatts = _devices
-        .where((d) => d.isOn)
-        .fold(0.0, (sum, item) => sum + item.powerConsumptionWatts);
+        .where((device) => device.isOn)
+        .fold(0.0, (sum, device) => sum + device.powerConsumptionWatts);
     return totalWatts / 1000.0;
   }
 
   @override
   Widget build(BuildContext context) {
-    final filteredList = _filteredDevices;
-
-    // New dark palette
-    const bgTop = Color(0xFF0B1020); // deepest navy
-    const bgBottom = Color(0xFF111834); // slightly lighter
-    const surface = Color(0xFF1A2140); // card surface
-    const surfaceBorder = Color(0xFF2A3358);
-    const accentIndigo = Color(0xFF818CF8); // soft indigo
-    const accentViolet = Color(0xFFA78BFA); // soft violet
-    const accentAmber = Color(0xFFFBBF24); // warm gold
-    const textPrimary = Color(0xFFF1F5F9);
-    const textMuted = Color(0xFF94A3B8);
+    final colorScheme = Theme.of(context).colorScheme;
+    final filteredDevices = _filteredDevices;
 
     return Scaffold(
-      backgroundColor: bgTop,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [bgTop, bgBottom],
-          ),
-        ),
+      body: SafeArea(
+        bottom: false,
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ===== Header / Greeting =====
-              SafeArea(
-                bottom: false,
-                child: const Padding(
-                  padding: EdgeInsets.only(top: 8, bottom: 8),
-                  child: SizedBox.shrink(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                child: HeaderGreeting(
+                  userName: 'Alex Morgan',
+                  activeDeviceCount: _activeCount,
+                  onSearchChanged: (query) {
+                    setState(() => _searchQuery = query);
+                  },
+                  onNotificationTap: _handleNotificationTap,
                 ),
               ),
-
-              const SizedBox(height: 8),
-
-              // ===== Hero Stats Panel (glassy) =====
+              const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF312E81),
-                        Color(0xFF1E1B4B),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: accentIndigo.withValues(alpha: 0.25),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: accentIndigo.withValues(alpha: 0.18),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: StatMetricCard(
-                          title: 'Active Devices',
-                          value: '$_activeCount',
-                          unit: 'devices',
-                          icon: Icons.power_rounded,
-                          color: accentIndigo,
-                        ),
-                      ),
-                      Container(
-                        width: 1,
-                        height: 70,
-                        color: Colors.white.withValues(alpha: 0.08),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: StatMetricCard(
-                          title: 'Current Power',
-                          value: _totalPowerConsumptionKw.toStringAsFixed(2),
-                          unit: 'kW',
-                          icon: Icons.bolt_rounded,
-                          color: accentAmber,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              // ===== Quick Mode Selector =====
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Quick Modes',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: textPrimary,
-                        letterSpacing: 0.2,
+                    Expanded(
+                      flex: 3,
+                      child: StatMetricCard(
+                        title: 'Current power usage',
+                        value: _totalPowerConsumptionKw.toStringAsFixed(2),
+                        unit: 'kW',
+                        icon: Icons.bolt_rounded,
+                        color: colorScheme.primary,
+                        prominent: true,
                       ),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: accentIndigo.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: accentIndigo.withValues(alpha: 0.3),
-                        ),
-                      ),
-                      child: Text(
-                        _activeMode,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: accentIndigo,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      flex: 2,
+                      child: StatMetricCard(
+                        title: 'Active devices',
+                        value: '$_activeCount',
+                        unit: 'devices',
+                        icon: Icons.power_rounded,
+                        color: colorScheme.secondary,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 28),
               QuickModeSelector(
                 modes: _modes,
                 activeMode: _activeMode,
                 onModeSelected: _handleModeChange,
               ),
-
               const SizedBox(height: 28),
-
-              // ===== Room Category Tabs =====
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: const Text(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Text(
                   'Rooms',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: textPrimary,
-                    letterSpacing: 0.2,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
               const SizedBox(height: 12),
               CategoryFilterTabs(
                 categories: _roomCategories,
                 selectedCategory: _selectedRoomCategory,
-                onCategorySelected: _handleCategoryChange,
+                onCategorySelected: (category) {
+                  setState(() => _selectedRoomCategory = category);
+                },
               ),
-
               const SizedBox(height: 28),
-
-              // ===== Devices Header =====
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        const Text(
-                          'Devices',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: textPrimary,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${filteredList.length}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: accentViolet,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'Devices',
+                      style: Theme.of(context).textTheme.titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700),
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${filteredDevices.length}',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Spacer(),
                     Text(
                       'Tap to toggle',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: textMuted.withValues(alpha: 0.8),
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 14),
-
-              // ===== Device Grid / Empty State =====
-              if (filteredList.isEmpty)
+              if (filteredDevices.isEmpty)
                 Padding(
-                  padding: const EdgeInsets.all(40.0),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: surface,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: surfaceBorder,
-                              width: 1,
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(28),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.search_off_rounded,
+                              size: 40,
+                              color: colorScheme.onSurfaceVariant,
                             ),
-                          ),
-                          child: const Icon(
-                            Icons.search_off_rounded,
-                            size: 40,
-                            color: textMuted,
-                          ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No devices found',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Try a different filter or search term.',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No devices found',
-                          style: TextStyle(
-                            color: textPrimary,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Try a different filter or search term.',
-                          style: TextStyle(color: textMuted, fontSize: 13),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 )
               else
                 GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: filteredList.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  itemCount: filteredDevices.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 14,
                     mainAxisSpacing: 14,
                     childAspectRatio: 0.95,
                   ),
                   itemBuilder: (context, index) {
-                    final device = filteredList[index];
+                    final device = filteredDevices[index];
                     return DeviceControlTile(
                       key: ValueKey(device.id),
                       device: device,
@@ -435,8 +296,7 @@ class _SmartHomeScreenState extends State<SmartHomeScreen> {
                     );
                   },
                 ),
-
-              const SizedBox(height: 40),
+              const SizedBox(height: 32),
             ],
           ),
         ),
